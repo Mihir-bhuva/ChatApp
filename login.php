@@ -1,40 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+    session_start();
+    
+    include_once "config.php";
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="CSS/index.css">
-    <title>Chat App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
+    $email = mysqli_real_escape_string($connect , $_POST["email"]);
+    $password = mysqli_real_escape_string($connect , $_POST["password"]);
 
-<body>
-    <div class="container">
-        <section class="form signup" >
-            <header>Real ChatApp</header>
-            <form action="#" id="form">
-                <div id="error-txt" class="error-txt"></div>
-                <div class="fields input">
-                    <label for="email"  type="email">Email Address: </label>
-                    <input type="text"  name="email" placeholder="Enter Your Email ">
-                </div>
-                <div class="fields input">
-                    <label for="password">Password: </label>
-                    <input type="password" name="password" id="password"  onfocusout="eyeslash()" placeholder="Enter Your Password">
-                    <i class="fa fa-eye-slash" onclick="eye()" id="eye"></i>
-                </div>
-                <div class="fields button">
-                    <input type="submit" id="indexsubmit" value="Start the chat">
-                </div>
-            </form>
-            <div class="link">Not yet signed Up? <a href="index.php">SignUp now</a> </div>
-        </section>
-    </div>
-</body>
+    if(!empty($email) && !empty($password)){
+        if(filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $sqlemail = mysqli_query($connect, "SELECT email from chatdata WHERE email = '{$email}' ");
 
-<script src="JAVASCRIPT/login.js"></script>
-
-
-</html>
+            if(mysqli_num_rows($sqlemail)>0){
+                $sqlpassword = mysqli_query($connect, "SELECT * from chatdata where email = '{$email}'  ");
+                
+                $row = mysqli_fetch_assoc($sqlpassword);
+                if($password == $row["password"]){
+                     $_SESSION['unique_id'] = $row['unique_id'];
+                     
+                     $sql =mysqli_query($connect,"UPDATE chatdata set status = 'Online' where unique_id = '{$_SESSION['unique_id']}'");
+                    echo "success";
+                }
+                else{
+                    echo "Pass is wrong";
+                }
+            
+            }
+            else{
+                echo "User not Found";
+            }
+        }
+        else{
+            echo "Enter Valid E-Mail Address";
+        }
+    }
+    else{
+        echo "All Fields are required";
+    }
+?>
